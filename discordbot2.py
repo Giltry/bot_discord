@@ -17,6 +17,7 @@ class MusicBot(commands.Cog):
         self.loop = False  # Estado del loop
         self.current_song = None  # URL de la canción actual
         self.current_song_title = None  # Título de la canción actual
+        self.disconnect_timer = None # Timer para desconexion automatica
 
     @commands.command(aliases=["p"])
     async def play(self, ctx, *, search):
@@ -49,15 +50,17 @@ class MusicBot(commands.Cog):
             # Repite la canción actual si el loop está activado
             source = await discord.FFmpegOpusAudio.from_probe(self.current_song, **FFMPEG_OPTIONS)
             ctx.voice_client.play(source, after=lambda _: self.client.loop.create_task(self.play_next(ctx)))
-            await ctx.send(f"Reproduciendo en loop: **{self.current_song_title}**")  # Mensaje actualizado
+            await ctx.send(f"Reproduciendo en loop: **{self.current_song_title}**")
         elif self.queue:
             # Reproduce la siguiente canción de la cola
             self.current_song, self.current_song_title = self.queue.pop(0)
             source = await discord.FFmpegOpusAudio.from_probe(self.current_song, **FFMPEG_OPTIONS)
             ctx.voice_client.play(source, after=lambda _: self.client.loop.create_task(self.play_next(ctx)))
-            await ctx.send(f"Ahora reproduciendo: **{self.current_song_title}**")
+            await ctx.send(f"Ahora reproduciendo: **{self.current_song_title}** (≧❂◡❂≦)")
         else:
-            await ctx.send("La cola está vacía. Agrega más canciones con el comando **(! - + /)** y play.")
+            await ctx.send("La cola está vacía. Agrega más canciones con el comando **( ! - + / )** y play.")
+            await self.disconnect_if_inactive(ctx)  # Inicia el temporizador para desconexión
+            
 
     @commands.command()
     async def queue(self, ctx):
@@ -102,12 +105,18 @@ class MusicBot(commands.Cog):
             await ctx.voice_client.disconnect()
             await ctx.send("Reproducción detenida y bot desconectado.")
 
-    async def auto_disconnect(self, ctx):
-        """Desconecta al bot después de 2 minutos de inactividad."""
-        await asyncio.sleep(120)
-        if not ctx.voice_client.is_playing() and not ctx.voice_client.is_paused():
-            await ctx.voice_client.disconnect()
-            await ctx.send("Me desconecté por inactividad.")
+    async def disconnect_if_inactive(self, ctx, delay=30):
+        """Desconecta al bot del canal de voz si esta inactivo por un periodo."""
+        if self.disconnect_timer:
+            self.disconnect_timer.cancel() # Cancela el timer previo si existe
+
+        async def timer():
+            await asyncio.sleep(delay)
+            if not ctx.voice_client.is_playing() and not self.queue:
+                await ctx.voice_client.disconnect()
+                await ctx.send("Me desconecte debido a inactividad.")
+
+        self.disconnect_timer = asyncio.create_task(timer())
 
 client = commands.Bot(command_prefix=["!", "+", "/", "-"], intents=intents)
 
