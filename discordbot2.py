@@ -8,8 +8,7 @@ intents.message_content = True
 intents.voice_states = True
 
 FFMPEG_OPTIONS = {'options': '-vn'}
-YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': False}
-
+YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': False, 'quiet': True}
 
 class MusicBot(commands.Cog):
     def __init__(self, client):
@@ -58,7 +57,7 @@ class MusicBot(commands.Cog):
             ctx.voice_client.play(source, after=lambda _: self.client.loop.create_task(self.play_next(ctx)))
             await ctx.send(f"Ahora reproduciendo: **{self.current_song_title}**")
         else:
-            await ctx.send("La cola está vacía. Agrega más canciones con el comando !play.")
+            await ctx.send("La cola está vacía. Agrega más canciones con el comando **(! - + /)** y play.")
 
     @commands.command()
     async def queue(self, ctx):
@@ -110,10 +109,17 @@ class MusicBot(commands.Cog):
             await ctx.voice_client.disconnect()
             await ctx.send("Me desconecté por inactividad.")
 
-client = commands.Bot(command_prefix="!", intents=intents)
+client = commands.Bot(command_prefix=["!", "+", "/", "-"], intents=intents)
+
+@client.event
+async def on_ready():
+    print(f'Bot conectado como {client.user}')
 
 async def main():
-    await client.add_cog(MusicBot(client))
-    await client.start('MTMwMjc4Njk4NjU1NzMxMzA2NQ.Gh5Gvy.LIkn2MV0zZruGO09cuWxVxSBSzPP22IMxUD_nM')
+    try:
+        await client.add_cog(MusicBot(client))
+        await client.start('MTMwMjc4Njk4NjU1NzMxMzA2NQ.Gh5Gvy.LIkn2MV0zZruGO09cuWxVxSBSzPP22IMxUD_nM')
+    except Exception as e:
+        print("Error al iniciar el bot:",str(e))
 
 asyncio.run(main())
