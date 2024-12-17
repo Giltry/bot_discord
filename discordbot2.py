@@ -56,12 +56,11 @@ class MusicBot(commands.Cog):
             self.current_song, self.current_song_title = self.queue.pop(0)
             source = await discord.FFmpegOpusAudio.from_probe(self.current_song, **FFMPEG_OPTIONS)
             ctx.voice_client.play(source, after=lambda _: self.client.loop.create_task(self.play_next(ctx)))
-            await ctx.send(f"Ahora reproduciendo: **{self.current_song_title}** (≧❂◡❂≦)")
+            await ctx.send(f"Ahora reproduciendo: **{self.current_song_title}** (≧ᗜˬᗜ≦)")
         else:
             await ctx.send("La cola está vacía. Agrega más canciones con el comando **( ! - + / )** y play.")
             await self.disconnect_if_inactive(ctx)  # Inicia el temporizador para desconexión
             
-
     @commands.command()
     async def queue(self, ctx):
         """Muestra las canciones en la cola."""
