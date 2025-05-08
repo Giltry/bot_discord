@@ -102,5 +102,5 @@ client.on('messageCreate', async (message) => {
 });
 
 client.login(
-  "MTMwMjc4Njk4NjU1NzMxMzA2NQ.Gh5Gvy.LIkn2MV0zZruGO09cuWxVxSBSzPP22IMxUD_nM"
+  "YOUR_TOKEN_HERE" // Reemplaza con tu token de bot de Discord"
 );

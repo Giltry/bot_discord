@@ -126,7 +126,7 @@ async def on_ready():
 async def main():
     try:
         await client.add_cog(MusicBot(client))
-        await client.start('MTMwMjc4Njk4NjU1NzMxMzA2NQ.Gh5Gvy.LIkn2MV0zZruGO09cuWxVxSBSzPP22IMxUD_nM')
+        await client.start('YOUT_TOKEN')
     except Exception as e:
         print("Error al iniciar el bot:",str(e))
 
